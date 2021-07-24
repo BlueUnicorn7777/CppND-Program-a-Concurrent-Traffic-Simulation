@@ -14,7 +14,9 @@ void Graphics::simulate()
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
         // update graphics
-        this->drawTrafficObjects();
+        if(this->drawTrafficObjects()!=-1){
+            cv::destroyAllWindows();
+            break;}
     }
 }
 
@@ -26,12 +28,13 @@ void Graphics::loadBackgroundImg()
 
     // load image and create copy to be used for semi-transparent overlay
     cv::Mat background = cv::imread(_bgFilename);
+
     _images.push_back(background);         // first element is the original background
     _images.push_back(background.clone()); // second element will be the transparent overlay
     _images.push_back(background.clone()); // third element will be the result image for display
 }
 
-void Graphics::drawTrafficObjects()
+int Graphics::drawTrafficObjects()
 {
     // reset images
     _images.at(1) = _images.at(0).clone();
@@ -68,5 +71,9 @@ void Graphics::drawTrafficObjects()
 
     // display background and overlay image
     cv::imshow(_windowName, _images.at(2));
-    cv::waitKey(33);
+    cv::resizeWindow(_windowName, 1500, 1500);
+    return cv::waitKey(33) ;
+    //cv::waitKey(33);
+
+
 }
