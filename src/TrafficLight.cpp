@@ -27,6 +27,7 @@ void MessageQueue<T>::send(T &&msg)
     // FP.4a : The method send should use the mechanisms std::lock_guard<std::mutex> 
     // as well as _condition.notify_one() to add a new message to the queue and afterwards send a notification.
      std::lock_guard<std::mutex> uLock(_mutex);
+     _queue.clear();
     _queue.emplace_back(std::move(msg));
     _condition.notify_one();
 }
@@ -65,31 +66,34 @@ void TrafficLight::simulate()
 // virtual function which is executed in a thread
 void TrafficLight::cycleThroughPhases()
 {
-    // FP.2a : Implement the function with an infinite loop that measures the time between two loop cycles 
-    // and toggles the current phase of the traffic light between red and green and sends an update method 
-    // to the message queue using move semantics. The cycle duration should be a random value between 4 and 6 seconds. 
-    // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles. 
+    // FP.2a : Implement the function with an infinite loop that measures the time between two loop cycles
+    // and toggles the current phase of the traffic light between red and green and sends an update method
+    // to the message queue using move semantics. The cycle duration should be a random value between 4 and 6 seconds.
+    // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles.
 
-    auto  start_time = Clock::now();
-    auto end_time = Clock::now();
-    std::chrono::duration<double, std::milli> target(3000);
-    //std::unique_lock<std::mutex> uLock(_mutex);
-    //uLock.unlock();
-    while(1){
-        std::chrono::duration<double, std::milli> elapsed = end_time - start_time;
+    std::random_device rd;
+    std::mt19937 eng(rd());
+    std::uniform_int_distribution<int> distr(4000, 6000);
+    auto cycle_Duration = std::chrono::duration<int>(distr(eng));
+    auto Last_Update = std::chrono::system_clock::now();
 
-        if( elapsed.count() > target.count()){
-           // std::cout<<target.count()<<"  "<<elapsed.count()<<std::endl;
-            start_time = Clock::now();
-           // uLock.lock();
+    std::chrono::milliseconds timeSinceLastUpdate;
+    while(true){
+
+        timeSinceLastUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - Last_Update);
+
+        if (timeSinceLastUpdate.count() >= cycle_Duration.count()){
             _currentPhase = (_currentPhase==TrafficLightPhase::red)?TrafficLightPhase::green:TrafficLightPhase::red;
-            _message_queue.send(std::move(_currentPhase));
-           // uLock.unlock();
-            target = std::chrono::duration<double, std::milli>((rand() % 2000 + 4000));
-           }
+        _message_queue.send(std::move(_currentPhase));
+        Last_Update = std::chrono::system_clock::now();
+        cycle_Duration = std::chrono::duration<int>(distr(eng));
+        }
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        end_time = Clock::now();
+
     }
 
+
 }
+
+
 

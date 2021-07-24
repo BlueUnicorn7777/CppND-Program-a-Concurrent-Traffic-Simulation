@@ -71,7 +71,7 @@ int Graphics::drawTrafficObjects()
 
     // display background and overlay image
     cv::imshow(_windowName, _images.at(2));
-    cv::resizeWindow(_windowName, 1500, 1500);
+    //cv::resizeWindow(_windowName, 1500, 1500);
     return cv::waitKey(33) ;
     //cv::waitKey(33);
 
