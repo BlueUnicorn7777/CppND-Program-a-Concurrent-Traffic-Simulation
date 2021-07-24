@@ -94,8 +94,7 @@ void Intersection::addVehicleToQueue(std::shared_ptr<Vehicle> vehicle)
 
     if(!trafficLightIsGreen()) {
      _trafficLight.waitForGreen();
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-     }
+       }
 
 
 
