@@ -17,7 +17,6 @@ T MessageQueue<T>::receive()
     _condition.wait(uLock, [this] { return !_queue.empty(); });
     T msg = std::move(_queue.back());
     _queue.pop_back();
-
     return msg;
 }
 
@@ -27,7 +26,7 @@ void MessageQueue<T>::send(T &&msg)
     // FP.4a : The method send should use the mechanisms std::lock_guard<std::mutex> 
     // as well as _condition.notify_one() to add a new message to the queue and afterwards send a notification.
      std::lock_guard<std::mutex> uLock(_mutex);
-     _queue.clear();
+    _queue.clear() ;
     _queue.emplace_back(std::move(msg));
     _condition.notify_one();
 }
